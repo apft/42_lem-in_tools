@@ -23,16 +23,18 @@ print_error()
 
 run_test()
 {
-	local name=`echo $1 | cut -d';' -f1`
-	local map=`echo $1 | cut -d';' -f2`
+	local name=`echo $@ | cut -d';' -f1`
+	local map=`echo $@ | cut -d';' -f2`
 
-	${PROJECT_PATH}/lem-in < ${MAP_PATH}/${map} 2> ${TEST_TMP}
+	printf "%-40s" "$name"
+	${PROJECT_PATH}/lem-in < "${MAP_PATH}/${map}" 2> ${TEST_TMP}
 	local output=`cat -e ${TEST_TMP}`
-	if [ "${output}" = "ERROR$" ]; then
+	if [ "${output:0:5}" = "ERROR" ]; then
 		print_ok "Good!"
 	else
-		print_error "Boooo!"
+		print_error "Booo!"
 	fi
+	printf "\n"
 }
 
 while read line

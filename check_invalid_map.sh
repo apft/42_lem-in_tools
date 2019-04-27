@@ -27,7 +27,7 @@ run_test()
 	local map=`echo $@ | cut -d';' -f2`
 
 	printf "%-40s" "$name"
-	${PROJECT_PATH}/lem-in < "${MAP_PATH}/${map}" 2> ${TEST_TMP}
+		${PROJECT_PATH}/lem-in < "${MAP_PATH}/${map}" > /dev/null 2> ${TEST_TMP}
 	local output=`cat -e ${TEST_TMP}`
 	if [ "${output:0:5}" = "ERROR" ]; then
 		print_ok "Good!"

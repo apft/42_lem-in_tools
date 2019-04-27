@@ -4,9 +4,11 @@ room name starts with 'L';room_start_with_L
 room name has '-';room_has_dash
 room name with unprintable char;room_has_unprintable_char
 room line without coord;room_without_coord
-room line with too much args;room_too_much_arg
+(tube) room line with too much args (=> error during tube parsing /!\\ -DISCUSSION NEEDED-);room_too_much_arg
 room with invalid coord;room_invalid_coord
 room already exists;room_duplicated
+room name duplicated;room_name_duplicated
+room coord duplicated;room_coord_duplicated
 no start given;no_start
 no end given;no_end
 tube: room does not exist;tube_room_does_not_exist

@@ -34,6 +34,7 @@ run_test()
 	else
 		print_error "Booo!"
 	fi
+	printf "%5s%-60s" "" "`cat ${TEST_TMP}`"
 	printf "\n"
 }
 

@@ -1,0 +1,8 @@
++34
+##start
+start 0 0
+##end
+end 1 1
+middle 1 0
+start-middle
+middle-end

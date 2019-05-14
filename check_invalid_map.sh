@@ -42,3 +42,4 @@ while read line
 do
 	run_test ${line}
 done < ${INPUT_DATA}
+rm $TEST_TMP

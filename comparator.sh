@@ -29,7 +29,7 @@ function print_header()
 	printf "        exp  "
 	for bin in $@
 	do
-		printf "%*s   " 10 $bin
+		printf "%*s  " 19 $bin
 	done
 	printf "\n"
 }
@@ -47,10 +47,11 @@ function	run()
 		for bin in $@
 		do
 			usr=`$bin < $MAP | grep "^L" | wc -l | bc`
+			time=`{ time $bin < $MAP ; } 2>&1 | grep real | cut -f2`
 			if [ ${#bin} -lt 16 ]; then
-				printf "%4d (%+3d)   "  $usr $((usr-max))
+				printf "%4d (%+3d) %s  "  $usr $((usr-max)) $time
 			else
-				printf "%*s%4d (%+3d)   " $((${#bin} - 10)) "" $usr $((usr-max))
+				printf "%*s%4d (%+3d) %s  " $((${#bin} - 10)) "" $usr $((usr-max)) $time
 			fi
 			((j++))
 		done

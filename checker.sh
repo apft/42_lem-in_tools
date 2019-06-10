@@ -16,11 +16,23 @@ NB_PATH=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
 echo "ants: ${NB_ANTS}"
 echo "path: ${NB_PATH}"
 
+function print_paths()
+{
+	for i in `seq ${NB_PATH}`
+	do
+		printf "%d: " $i
+		grep -E -o "L$i-[A-Z][a-z_]{2}[0-9]" $OUTPUT | cut -d '-' -f 2 | tr '\n' ' '
+		printf "\n"
+	done
+}
+
 function length()
 {
 	local	index="$1"
 	grep "L${index}-" $OUTPUT | wc -l | bc
 }
+
+print_paths
 
 for i in `seq ${NB_PATH}`
 do

@@ -1,8 +1,7 @@
 #!/bin/sh
 
 TYPE="$1"
-
-[ "$2" ] && EXEC="$2" || EXEC="./lem-in"
+shift
 
 MAP=".map"
 MAP_BFR=".map_old"
@@ -25,19 +24,35 @@ function generate_new_map()
 	done
 }
 
+function print_header()
+{
+	printf "        exp  "
+	for bin in $@
+	do
+		printf "%10s   " $bin
+	done
+	printf "\n"
+}
+
 function	run()
 {
-	printf "        usr   exp   diff\n"
+	print_header $@
 
 	for i in {1..20}
 	do
 		generate_new_map
 		max=`tail -n 1 $MAP | cut -d ':' -f 2 | bc`
-		usr=`./$EXEC < $MAP | grep "^L" | wc -l | bc`
-		diff=$((usr-max))
-		printf "%4d : %4d  %4d    %+2d\n" $i $usr $max $diff
-		let "COMP[$((10 + diff))]++"
+		printf "%4d : %4d  " $i $max
+		j=0
+		for bin in $@
+		do
+			usr=`$bin < $MAP | grep "^L" | wc -l | bc`
+			printf "%*s%4d (%+0d)   " $((${#bin} - 10)) "" $usr $((usr-max))
+			((j++))
+		done
+	#	let "COMP[$((10 + diff))]++"
 		mv $MAP ${MAP_BFR}
+		printf "\n"
 	done
 }
 
@@ -76,7 +91,7 @@ function	print_summary()
 touch $MAP ${MAP_BFR}
 
 initialize_array_comp
-run
-print_summary
+run $@
+#print_summary
 
 rm ${MAP_BFR}

@@ -29,7 +29,7 @@ function print_header()
 	printf "        exp  "
 	for bin in $@
 	do
-		printf "%10s   " $bin
+		printf "%*s   " 10 $bin
 	done
 	printf "\n"
 }
@@ -38,7 +38,7 @@ function	run()
 {
 	print_header $@
 
-	for i in {1..20}
+	for i in {1..25}
 	do
 		generate_new_map
 		max=`tail -n 1 $MAP | cut -d ':' -f 2 | bc`
@@ -47,10 +47,14 @@ function	run()
 		for bin in $@
 		do
 			usr=`$bin < $MAP | grep "^L" | wc -l | bc`
-			printf "%*s%4d (%+0d)   " $((${#bin} - 10)) "" $usr $((usr-max))
+			if [ ${#bin} -lt 16 ]; then
+				printf "%4d (%+3d)   "  $usr $((usr-max))
+			else
+				printf "%*s%4d (%+3d)   " $((${#bin} - 10)) "" $usr $((usr-max))
+			fi
 			((j++))
 		done
-	#	let "COMP[$((10 + diff))]++"
+		[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
 		mv $MAP ${MAP_BFR}
 		printf "\n"
 	done
@@ -92,6 +96,6 @@ touch $MAP ${MAP_BFR}
 
 initialize_array_comp
 run $@
-#print_summary
+[ ${#@} -eq 1 ] && print_summary
 
 rm ${MAP_BFR}

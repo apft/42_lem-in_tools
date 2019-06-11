@@ -22,3 +22,7 @@ room redeclared after tube;room_after_tube
 empty map;empty_map
 empty line no tube to end;empty_line_no_tube_to_end
 empty line no end defined;empty_line_no_end_defined
+no tubes;no_tubes
+start is end;start_is_end
+start command not followed by room;start_not_followed_by_room
+start command before tube;start_command_before_tube

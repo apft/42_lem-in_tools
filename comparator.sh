@@ -1,5 +1,7 @@
 #!/bin/sh
 
+NB_TESTS="$1"
+shift
 TYPE="$1"
 shift
 
@@ -36,9 +38,13 @@ function print_header()
 
 function	run()
 {
+	MAX_DIFF_LINES=-999999
+	MIN_DIFF_LINES=999999
+	local sum_diff_lines=0
 	print_header $@
 
-	for i in {1..25}
+	local i=1;
+	while [ $i -le $NB_TESTS ];
 	do
 		generate_new_map
 		max=`tail -n 1 $MAP | cut -d ':' -f 2 | bc`
@@ -48,17 +54,23 @@ function	run()
 		do
 			usr=`$bin < $MAP | grep "^L" | wc -l | bc`
 			time=`{ time $bin < $MAP ; } 2>&1 | grep real | cut -f2`
-			if [ ${#bin} -lt 16 ]; then
+			if [ ${#bin} -lt 19 ]; then
 				printf "%4d (%+3d) %s  "  $usr $((usr-max)) $time
 			else
-				printf "%*s%4d (%+3d) %s  " $((${#bin} - 10)) "" $usr $((usr-max)) $time
+				printf "%*s%4d (%+3d) %s  " $((${#bin} - 19)) "" $usr $((usr-max)) $time
 			fi
+			local diff=$((usr-max))
+			[ ${#@} -eq 1 ] && [ "$diff" -lt "$MIN_DIFF_LINES" ] && MIN_DIFF_LINES="$diff"
+			[ ${#@} -eq 1 ] && [ "$diff" -gt "$MAX_DIFF_LINES" ] && MAX_DIFF_LINES="$diff"
+			[ ${#@} -eq 1 ] && sum_diff_lines=$((sum_diff_lines + diff))
 			((j++))
 		done
 		[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
 		mv $MAP ${MAP_BFR}
 		printf "\n"
+		((i++))
 	done
+	[ ${#@} -eq 1 ] && AVERAGE_DIFF_LINES=`scale=2; echo "$sum_diff_lines/$NB_TESTS" | bc -l`
 }
 
 function	print_graph()
@@ -91,6 +103,11 @@ function	print_summary()
 	printf "\n"
 
 	print_graph
+
+	printf "\nResults\n"
+	printf "  ⤷ Average: %.2f\n" "$AVERAGE_DIFF_LINES"
+	printf "  ⤷ Min: %d\n" "$MIN_DIFF_LINES"
+	printf "  ⤷ Max: %d\n" "$MAX_DIFF_LINES"
 }
 
 touch $MAP ${MAP_BFR}

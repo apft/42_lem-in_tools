@@ -41,10 +41,11 @@ function	run()
 	MAX_DIFF_LINES=-999999
 	MIN_DIFF_LINES=999999
 	local sum_diff_lines=0
+	local sum_time=0.0
+	local tmp_out=out.tmp
 	print_header $@
 
-	local i=1;
-	while [ $i -le $NB_TESTS ];
+	for i in `seq $NB_TESTS`
 	do
 		generate_new_map
 		max=`tail -n 1 $MAP | cut -d ':' -f 2 | bc`
@@ -52,8 +53,11 @@ function	run()
 		j=0
 		for bin in $@
 		do
-			usr=`$bin < $MAP | grep "^L" | wc -l | bc`
-			time=`{ time $bin < $MAP ; } 2>&1 | grep real | cut -f2`
+			{ time $bin < $MAP; } > $tmp_out 2>&1
+			usr=`grep "^L" $tmp_out | wc -l | bc`
+			time=`grep real $tmp_out | cut -f2`
+			time_nb=`echo $time | cut -c3-7 | bc -l`
+			[ ${#@} -eq 1 ] && sum_time=`scale=3; echo "$sum_time + $time_nb" | bc -l`
 			if [ ${#bin} -lt 19 ]; then
 				printf "%4d (%+3d) %s  "  $usr $((usr-max)) $time
 			else
@@ -68,9 +72,10 @@ function	run()
 		[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
 		mv $MAP ${MAP_BFR}
 		printf "\n"
-		((i++))
 	done
 	[ ${#@} -eq 1 ] && AVERAGE_DIFF_LINES=`scale=2; echo "$sum_diff_lines/$NB_TESTS" | bc -l`
+	[ ${#@} -eq 1 ] && AVERAGE_TIME=`scale=3; echo "$sum_time/$NB_TESTS" | bc -l`
+	rm -f $tmp_out
 }
 
 function	print_graph()
@@ -105,6 +110,7 @@ function	print_summary()
 	print_graph
 
 	printf "\nResults\n"
+	printf "  ⤷ Time average: %.3fs\n" "$AVERAGE_TIME"
 	printf "  ⤷ Average: %.2f\n" "$AVERAGE_DIFF_LINES"
 	printf "  ⤷ Min: %d\n" "$MIN_DIFF_LINES"
 	printf "  ⤷ Max: %d\n" "$MAX_DIFF_LINES"

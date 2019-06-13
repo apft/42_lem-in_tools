@@ -93,7 +93,7 @@ function	print_graph()
 	done
 }
 
-function	print_summary()
+function	print_axis()
 {
 	printf "\n"
 	for i in {-10..10}
@@ -106,8 +106,12 @@ function	print_summary()
 		printf " %4d" ${COMP[$i]}
 	done
 	printf "\n"
+}
 
+function	print_summary()
+{
 	print_graph
+	print_axis
 
 	printf "\nResults\n"
 	printf "  ⤷ Time average: %.3fs\n" "$AVERAGE_TIME"

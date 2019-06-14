@@ -1,5 +1,22 @@
 #!/bin/sh
 
+function print_usage()
+{
+	echo "usage:"
+	echo "\t$0 nb type exe [exe ...]\n"
+	echo "example:"
+	echo "\t$0 25 big-superposition ./lem-in"
+	echo "\t\t> run 25 times 'lem-in' programm with random big-superposition map"
+	echo "\t$0 15 big /path/project1/lem-in /path/project2/lem-in"
+	echo "\t\t> run 15 times each programm with random big map"
+	echo "options:"
+	echo "\t- nb\tnumber of tests to run"
+	echo "\t- type\tant farm size based on 'generator' options (run './generator --help' for more information)"
+	echo "\t- exe\tpath to each executable file to compare"
+}
+
+[ $# -lt 3 ] && print_usage && exit 1;
+
 NB_TESTS="$1"
 shift
 TYPE="$1"

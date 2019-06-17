@@ -3,14 +3,17 @@
 # recuperer le nombre de chemin : 1ere ligne
 # creer le tableau de longeur des chemind
 # pour le reste des fourmis, checker que la longeur de son chemin est coherente
+# verifier qu'une fourmi ne se deplace qu'une fois par ligne
+# verifier que le chemin est valide
+# lecture ligne a ligne de la sortie du prgm ./lem-in
 
 EXEC="$1"
-FILE="$2"
+MAP="$2"
 
 OUTPUT=".out_checker"
-$EXEC < $FILE > $OUTPUT
+$EXEC < $MAP > $OUTPUT
 
-NB_ANTS=`head -n 1 $FILE`
+NB_ANTS=`head -n 1 $MAP`
 NB_PATH=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
 
 echo "ants: ${NB_ANTS}"

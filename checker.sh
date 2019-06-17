@@ -15,23 +15,6 @@ BLUE='\x1b[1;34m'
 MAGENTA='\x1b[1;35m'
 NC='\x1b[0m'
 
-EXEC="$1"
-MAP="$2"
-
-OUTPUT=".out_checker"
-$EXEC < $MAP > $OUTPUT
-
-NB_ANTS=`head -n 1 $MAP`
-NB_PATH=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
-
-function rm_tmp_files()
-{
-	for file in $@
-	do
-		[ -f "$file" ] && rm $file
-	done
-}
-
 # Print error message
 print_error(){
 	printf "${RED}%s${NC}\n" "$1"
@@ -47,6 +30,20 @@ print_warn(){
 	printf "${YELLOW}%s${NC}\n" "$1"
 }
 
+function print_usage()
+{
+	echo "usage:"
+	echo "\t$0 exec map"
+	exit 1
+}
+
+function rm_tmp_files()
+{
+	for file in $@
+	do
+		[ -f "$file" ] && rm $file
+	done
+}
 
 function extract_command()
 {
@@ -54,11 +51,6 @@ function extract_command()
 
 	grep -A 1 "##$room" $MAP | tail -n 1 | cut -d ' ' -f 1
 }
-
-ROOM_START=`extract_command "start"`
-ROOM_END=`extract_command "end"`
-echo "start: ${ROOM_START}"
-echo "end: ${ROOM_END}"
 
 function check_diff_output_map()
 {
@@ -98,29 +90,49 @@ function length()
 	grep "L${index}-" $OUTPUT | wc -l | bc
 }
 
-check_diff_output_map
+function run_main()
+{
+	[ $# -ne 2 ] && print_usage
 
-echo "ants: ${NB_ANTS}"
-echo "path: ${NB_PATH}"
+	EXEC="$1"
+	MAP="$2"
 
+	OUTPUT=".out_checker"
+	$EXEC < $MAP > $OUTPUT
 
-print_paths
+	NB_ANTS=`head -n 1 $MAP`
+	NB_PATH=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
 
-for i in `seq ${NB_PATH}`
-do
-	PATH_LENGTH[$i]=`length $i`
-done
+	check_diff_output_map
 
-echo "path length: ${PATH_LENGTH[@]}"
+	ROOM_START=`extract_command "start"`
+	ROOM_END=`extract_command "end"`
+	echo "start: ${ROOM_START}"
+	echo "end: ${ROOM_END}"
 
-for i in `seq ${NB_ANTS}`
-do
-	length=`length $i`
-	echo "${PATH_LENGTH[@]}" | grep "$length" > /dev/null
-	if [ $? -ne 0 ]; then
-		echo "error: ant $i goes through a path length of $length"
-		exit
-	fi
-done
+	echo "ants: ${NB_ANTS}"
+	echo "path: ${NB_PATH}"
 
-rm_tmp_files $OUTPUT
+	print_paths
+
+	for i in `seq ${NB_PATH}`
+	do
+		PATH_LENGTH[$i]=`length $i`
+	done
+
+	echo "path length: ${PATH_LENGTH[@]}"
+
+	for i in `seq ${NB_ANTS}`
+	do
+		length=`length $i`
+		echo "${PATH_LENGTH[@]}" | grep "$length" > /dev/null
+		if [ $? -ne 0 ]; then
+			echo "error: ant $i goes through a path length of $length"
+			exit
+		fi
+	done
+
+	rm_tmp_files $OUTPUT
+}
+
+run_main $@

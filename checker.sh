@@ -47,15 +47,8 @@ function rm_tmp_files()
 
 function clean_and_exit()
 {
-	rm_tmp_files $@
+	#rm_tmp_files $@
 	exit 1
-}
-
-function extract_command()
-{
-	local room=$1
-
-	grep -A 1 "##$room" $MAP | tail -n 1 | cut -d ' ' -f 1
 }
 
 function check_usr_output()
@@ -93,10 +86,10 @@ function check_diff_output_map()
 		print_error "Output map is different from input"
 		echo "diff -y input_map your_output_map"
 		diff -y $MAP $map
-		return "0"
+		return "1"
 	else
 		print_ok "Output map is correct"
-		return "1"
+		return "0"
 	fi
 }
 
@@ -116,33 +109,69 @@ function length()
 	grep "L${index}-" $OUTPUT | wc -l | bc
 }
 
-function run_main()
+function extract_command()
 {
-	local usr_map
-	local usr_solution
+	local room=$1
+
+	grep -A 1 "##$room" $MAP | tail -n 1 | cut -d ' ' -f 1
+}
+
+function check_only_one_move_per_ant()
+{
+	local line="$@"
+	local duplicate
+
+	duplicate=`echo "$line" | grep -Eo "L[0-9]+" | sort | uniq -d`
+	if [ "$duplicate" ]; then
+		print_error "Too many moves for at least an ant"
+		echo "ant nbr: {`echo $duplicate | tr -d 'L' | tr ' ' ','`} in line: '$line'"
+		return "1"
+	fi
+	return "0"
+}
+
+function check_only_one_ant_per_room()
+{
+	local line="$@"
+	local duplicate
+
+	duplicate=`echo "$line" | grep -Eo "\-[A-Za-z0-9_]+[[:>:]]" | cut -c 2- | sort | uniq -d`
+	if [ "$duplicate" ]; then
+		print_error "Too many ants in one room"
+		echo "room: {`echo $duplicate | tr -d 'L' | tr ' ' ','`} in line: '$line'"
+		return "1"
+	fi
+	return "0"
+}
+
+function check_usr_solution()
+{
+	local file_sol
 	local nb_ants
 	local room_start
 	local room_end
 	local nb_path
 	local path_length
 
-	usr_map=".usr_map"
-	usr_solution=".usr_solution"
-
-	extract_usr_output $usr_map $usr_solution
-	check_diff_output_map $usr_map
-	[ "$?" == 0 ] && clean_and_exit $OUTPUT $usr_map $usr_solution
+	file_sol=$1
 
 	nb_ants=`head -n 1 $MAP`
 	nb_path=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
 
 	room_start=`extract_command "start"`
 	room_end=`extract_command "end"`
-	echo "start: ${room_start}"
-	echo "end: ${room_end}"
 
-	echo "ants: ${nb_ants}"
-	echo "path: ${nb_path}"
+	while read line
+	do
+		check_only_one_ant_per_room $line
+		[ "$?" == 1 ] && return "1"
+		check_only_one_move_per_ant $line
+		[ "$?" == 1 ] && return "1"
+		#check_ant_room_on_path
+		#[ "$?" == 1 ] && return "1"
+	done < $file_sol
+
+	echo "number of paths found: ${nb_path}"
 
 	print_paths
 
@@ -162,14 +191,30 @@ function run_main()
 			exit
 		fi
 	done
+}
 
-	rm_tmp_files $OUTPUT
+function run_main()
+{
+	local usr_map
+	local usr_solution
+
+	usr_map=".usr_map"
+	usr_solution=".usr_solution"
+
+	extract_usr_output $usr_map $usr_solution
+	check_diff_output_map $usr_map
+	[ "$?" == 1 ] && clean_and_exit $OUTPUT $usr_map $usr_solution
+
+	check_usr_solution $usr_solution
+	[ "$?" == 1 ] && clean_and_exit $OUTPUT $usr_map $usr_solution
+
+	#rm_tmp_files $OUTPUT $usr_map $usr_solution
 }
 
 [ $# -ne 2 ] && print_usage
 EXEC="$1"
 MAP="$2"
-OUTPUT=".out_checker"
-$EXEC < $MAP > $OUTPUT
+OUTPUT=".out_checker1"
+#$EXEC < $MAP > $OUTPUT
 
 run_main

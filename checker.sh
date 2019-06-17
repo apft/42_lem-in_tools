@@ -60,6 +60,27 @@ ROOM_END=`extract_command "end"`
 echo "start: ${ROOM_START}"
 echo "end: ${ROOM_END}"
 
+function check_diff_output_map()
+{
+	local output_map
+	local line_sep
+	local diff
+
+	output_map=".out_map"
+	line_sep=`grep -nh "^$" $OUTPUT | cut -d ':' -f 1`
+	((line_sep--))
+	head -n ${line_sep} $OUTPUT > ${output_map}
+	diff=$(diff $MAP ${output_map})
+	if [ "$diff" ]; then
+		print_error "Output map is different from input"
+		echo "diff -y input_map your_output_map"
+		diff -y $MAP ${output_map}
+		rm_tmp_files $OUTPUT $output_map
+		exit 1
+	else
+		print_ok "Output map is correct"
+	fi
+}
 
 function print_paths()
 {
@@ -76,6 +97,8 @@ function length()
 	local	index="$1"
 	grep "L${index}-" $OUTPUT | wc -l | bc
 }
+
+check_diff_output_map
 
 echo "ants: ${NB_ANTS}"
 echo "path: ${NB_PATH}"

@@ -45,6 +45,12 @@ function rm_tmp_files()
 	done
 }
 
+function clean_and_exit()
+{
+	rm_tmp_files $@
+	exit 1
+}
+
 function extract_command()
 {
 	local room=$1
@@ -52,31 +58,51 @@ function extract_command()
 	grep -A 1 "##$room" $MAP | tail -n 1 | cut -d ' ' -f 1
 }
 
+function check_usr_output()
+{
+	local nb_empty_line
+
+	nb_empty_line=`grep -o "^$" $OUTPUT | wc -l | bc`
+	if [ "$nb_empty_line" -eq 0 ]; then
+		print_error "Missing empty line between map and solution"
+		clean_and_exit $OUTPUT
+	elif [ "$nb_empty_line" -ne 1 ]; then
+		print_error "Too many empty lines"
+		clean_and_exit $OUTPUT
+	fi
+}
+
+function extract_usr_output()
+{
+	local map=$1
+	local sol=$2
+
+	check_usr_output
+	grep -vE "(^$|^L)" $OUTPUT > $map
+	grep "^L" $OUTPUT > $sol
+}
+
 function check_diff_output_map()
 {
-	local output_map
-	local line_sep
+	local map
 	local diff
 
-	output_map=".out_map"
-	line_sep=`grep -nh "^$" $OUTPUT | cut -d ':' -f 1`
-	((line_sep--))
-	head -n ${line_sep} $OUTPUT > ${output_map}
-	diff=$(diff $MAP ${output_map})
+	map=$1
+	diff=$(diff $MAP $map)
 	if [ "$diff" ]; then
 		print_error "Output map is different from input"
 		echo "diff -y input_map your_output_map"
-		diff -y $MAP ${output_map}
-		rm_tmp_files $OUTPUT $output_map
-		exit 1
+		diff -y $MAP $map
+		return "0"
 	else
 		print_ok "Output map is correct"
+		return "1"
 	fi
 }
 
 function print_paths()
 {
-	for i in `seq ${NB_PATH}`
+	for i in `seq ${nb_path}`
 	do
 		printf "%d: " $i
 		grep -E -o "L$i-[A-Z][a-z_]{2}[0-9]" $OUTPUT | cut -d '-' -f 2 | tr '\n' ' '
@@ -92,40 +118,45 @@ function length()
 
 function run_main()
 {
-	[ $# -ne 2 ] && print_usage
+	local usr_map
+	local usr_solution
+	local nb_ants
+	local room_start
+	local room_end
+	local nb_path
+	local path_length
 
-	EXEC="$1"
-	MAP="$2"
+	usr_map=".usr_map"
+	usr_solution=".usr_solution"
 
-	OUTPUT=".out_checker"
-	$EXEC < $MAP > $OUTPUT
+	extract_usr_output $usr_map $usr_solution
+	check_diff_output_map $usr_map
+	[ "$?" == 0 ] && clean_and_exit $OUTPUT $usr_map $usr_solution
 
-	NB_ANTS=`head -n 1 $MAP`
-	NB_PATH=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
+	nb_ants=`head -n 1 $MAP`
+	nb_path=`grep "^L" $OUTPUT | head -n 1 | grep -o "L" | wc -l | bc`
 
-	check_diff_output_map
+	room_start=`extract_command "start"`
+	room_end=`extract_command "end"`
+	echo "start: ${room_start}"
+	echo "end: ${room_end}"
 
-	ROOM_START=`extract_command "start"`
-	ROOM_END=`extract_command "end"`
-	echo "start: ${ROOM_START}"
-	echo "end: ${ROOM_END}"
-
-	echo "ants: ${NB_ANTS}"
-	echo "path: ${NB_PATH}"
+	echo "ants: ${nb_ants}"
+	echo "path: ${nb_path}"
 
 	print_paths
 
-	for i in `seq ${NB_PATH}`
+	for i in `seq ${nb_path}`
 	do
-		PATH_LENGTH[$i]=`length $i`
+		path_length[$i]=`length $i`
 	done
 
-	echo "path length: ${PATH_LENGTH[@]}"
+	echo "path length: ${path_length[@]}"
 
-	for i in `seq ${NB_ANTS}`
+	for i in `seq ${nb_ants}`
 	do
 		length=`length $i`
-		echo "${PATH_LENGTH[@]}" | grep "$length" > /dev/null
+		echo "${path_length[@]}" | grep "$length" > /dev/null
 		if [ $? -ne 0 ]; then
 			echo "error: ant $i goes through a path length of $length"
 			exit
@@ -135,4 +166,10 @@ function run_main()
 	rm_tmp_files $OUTPUT
 }
 
-run_main $@
+[ $# -ne 2 ] && print_usage
+EXEC="$1"
+MAP="$2"
+OUTPUT=".out_checker"
+$EXEC < $MAP > $OUTPUT
+
+run_main

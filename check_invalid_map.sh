@@ -33,22 +33,28 @@ run_test()
 
 	printf "%-50s" "$name"
 	if [ -f "${MAP_PATH}/${map}" ];then
-		${PROJECT_PATH}/lem-in -e < "${MAP_PATH}/${map}" > /dev/null 2> ${TEST_TMP}
+		${PROJECT_PATH}/lem-in < "${MAP_PATH}/${map}" > /dev/null 2> ${TEST_TMP}
 		local output=`cat -e ${TEST_TMP}`
 		if [ "${output:0:5}" = "ERROR" ]; then
 			print_ok "Good!"
 		else
 			print_error "Booo!"
 		fi
-		printf "%5s%-60s" "" "`cat ${TEST_TMP}`"
+		printf "%5s%-60s" "" "`cat -e ${TEST_TMP}`"
 	else
 		print_warning "File not found"
 	fi
 	printf "\n"
 }
 
-while read line
-do
-	run_test ${line}
-done < ${INPUT_DATA}
-#rm $TEST_TMP
+run_all_tests()
+{
+	while read line
+	do
+		run_test ${line}
+	done < ${INPUT_DATA}
+}
+
+run_all_tests
+
+rm $TEST_TMP

@@ -31,7 +31,9 @@ GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 MAGENTA='\033[1;35m'
-NC='\033[0m'
+UNDERLINE='\033[4m'
+NC='\033[39m'
+RESET='\033[0m'
 
 function initialize_arrays()
 {
@@ -68,10 +70,10 @@ function generate_new_map()
 
 function print_header()
 {
-	printf "        exp  "
+	printf "${UNDERLINE}        exp ${NC}"
 	for bin in $@
 	do
-		printf "%*s  " 19 $bin
+		printf "${UNDERLINE}%*s  ${RESET}" 19 $bin
 	done
 	printf "\n"
 }
@@ -105,21 +107,21 @@ function get_value_winner_time()
 
 function print_result_line()
 {
-	local value_winner_diff=`get_value_winner_diff $@`
-	local value_winner_time=`get_value_winner_time $@`
+	[ ${#@} -gt 1 ] && local value_winner_diff=`get_value_winner_diff $@`
+	[ ${#@} -gt 1 ] && local value_winner_time=`get_value_winner_time $@`
 
 	for i in `seq ${#@}`
 	do
 		if [ "${COMP_DIFF[$i]}" -gt 0 ]; then
 			marker_diff=${RED}
-		elif [ "${COMP_DIFF[$i]}" -eq "$value_winner_diff" ]; then
+		elif [ ${#@} -gt 1 ] && [ "${COMP_DIFF[$i]}" -eq "$value_winner_diff" ]; then
 			marker_diff=${GREEN}
-			((COMP_WIN[$i]++))
+			((COMP_WIN_DIFF[$i]++))
 		else
 			marker_diff=${NC}
 		fi
-		local compare_time=`echo "${COMP_TIME[$i]} == $value_winner_time" | bc -l`
-		if [ $compare_time -eq 1 ]; then
+		[ ${#@} -gt 1 ] && local compare_time=`echo "${COMP_TIME[$i]} == $value_winner_time" | bc -l`
+		if [ ${#@} -gt 1 ] && [ $compare_time -eq 1 ]; then
 			marker_time=${GREEN}
 		else
 			marker_time=${NC}
@@ -207,12 +209,11 @@ function	print_axis()
 
 function	get_value_winner()
 {
-	local max="${COMP_WIN[1]}"
-
+	local max="${COMP_WIN_DIFF[1]}"
 	for i in `seq ${#@}`
 	do
-		if [ ${COMP_WIN[$i]} -gt $max ]; then
-			max="${COMP_WIN[$i]}"
+		if [ "${COMP_WIN_DIFF[$i]}" -gt "$max" ]; then
+			max="${COMP_WIN_DIFF[$i]}"
 		fi
 	done
 	printf "%d" $max
@@ -221,15 +222,42 @@ function	get_value_winner()
 function	print_winners()
 {
 	local	value_winner=`get_value_winner $@`
+	local	is_tie=`is_this_a_tie $value_winner $@`
 
-	printf "WINNER(S):"
+	printf "\n"
+	if [ $is_tie -eq 1 ]; then
+		printf "🏆  THIS IS A TIE! THE WINNERS ARE "
+	else
+		printf "🏆  THE WINNER IS"
+	fi
 	for i in `seq ${#@}`
 	do
-		if [ ${COMP_WIN[$i]} -eq $value_winner ];then
-			printf " %s" "${COMP_BIN[$i]}"
+		if [ "${COMP_WIN_DIFF[$i]}" -eq "$value_winner" ];then
+			printf " ${GREEN}%s${NC}" "${COMP_BIN[$i]}"
+			if [ $is_tie -eq 0 ]; then
+				break
+			fi
 		fi
 	done
-	printf "\n"
+	printf " 🏆 \n"
+}
+
+function	is_this_a_tie()
+{
+	local	value_winner=$1
+	local	nb_occur=0
+	shift
+	for i in `seq ${#@}`
+	do
+		if [ "${COMP_WIN_DIFF[$i]}" -eq "$value_winner" ];then
+			((nb_occur++))
+		fi
+		if [ $nb_occur -gt 1 ]; then
+			printf "%d" 1
+			return
+		fi
+	done
+	printf "%d" 0
 }
 
 function	print_summary()
@@ -250,5 +278,3 @@ initialize_array_comp
 initialize_arrays $@
 run $@
 [ ${#@} -eq 1 ] && print_summary || print_winners $@
-
-rm ${MAP_BFR}

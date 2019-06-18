@@ -1,3 +1,6 @@
+command start before number of ants;start_before_nb_ants
+command start and comments before number of ants;start_and_comments_before_nb_ants
+command end before number of ants;end_before_nb_ants
 number of ants empty;ants_empty
 number of ants followed by a sign;ants_nbr_invalid_char_2
 number of ants followed by an invalid char;ants_nbr_invalid_char

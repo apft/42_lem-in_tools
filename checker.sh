@@ -1,12 +1,5 @@
 #!/bin/sh
 
-# recuperer le nombre de chemin : 1ere ligne
-# creer le tableau de longeur des chemind
-# pour le reste des fourmis, checker que la longeur de son chemin est coherente
-# verifier qu'une fourmi ne se deplace qu'une fois par ligne
-# verifier que le chemin est valide
-# lecture ligne a ligne de la sortie du prgm ./lem-in
-
 # Colors
 RED='\x1b[1;31m'
 GREEN='\x1b[1;32m'
@@ -15,17 +8,14 @@ BLUE='\x1b[1;34m'
 MAGENTA='\x1b[1;35m'
 NC='\x1b[0m'
 
-# Print error message
 print_error(){
 	printf "${RED}%s${NC}\n" "$1"
 }
 
-# Print message ok
 print_ok(){
 	printf "${GREEN}%s${NC}\n" "$1"
 }
 
-# Print warning message
 print_warn(){
 	printf "${YELLOW}%s${NC}\n" "$1"
 }
@@ -276,7 +266,7 @@ run_main()
 	check_all_ants_reach_end $usr_solution $room_end $nb_ants
 	[ $? -eq 1 ] && clean_and_exit $OUTPUT $files
 
-	#rm_tmp_files $OUTPUT $files
+	rm_tmp_files $OUTPUT $files
 }
 
 [ $# -ne 2 ] && print_usage

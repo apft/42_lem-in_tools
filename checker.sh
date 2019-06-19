@@ -278,6 +278,8 @@ run_main()
 }
 
 [ $# -ne 2 ] && print_usage
+[ ! -x $1 ] && print_error "'$1' is not an executable file" && print_usage
+[ ! -f $2 ] && print_error "'$2' is not a valid file" && print_usage
 EXEC="$1"
 MAP="$2"
 OUTPUT=".out_checker"

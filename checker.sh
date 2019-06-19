@@ -275,4 +275,4 @@ MAP="$2"
 OUTPUT=".out_checker"
 $EXEC < $MAP > $OUTPUT
 
-run_main
+[ $? -eq 0 ] && run_main

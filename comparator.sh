@@ -10,6 +10,8 @@ UNDERLINE='\033[4m'
 NC='\033[0m'
 RESET='\033[0m'
 
+OUTPUT_LENGTH=19
+
 print_usage()
 {
 	echo "usage:"
@@ -43,6 +45,7 @@ initialize_arrays()
 	local i=1
 	for bin in $@
 	do
+		ERROR[$i]=0
 		COMP_DIFF[$i]=0
 		COMP_NB_LINES[$i]=0
 		COMP_TIME[$i]=0
@@ -73,10 +76,10 @@ generate_new_map()
 
 print_header()
 {
-	printf "${UNDERLINE}        exp ${NC}"
+	printf "%*s${UNDERLINE} %*s exp ${NC}" 7 "" $((2*${#@}))""
 	for bin in $@
 	do
-		printf "${UNDERLINE}%*s  ${RESET}" 19 $bin
+		printf "${UNDERLINE}%*s  ${RESET}" $OUTPUT_LENGTH $bin
 	done
 	printf "\n"
 }
@@ -115,6 +118,12 @@ print_result_line()
 
 	for i in `seq ${#@}`
 	do
+		if [ ${ERROR[$i]} -eq 1 ]; then
+			local width
+			[ ${#COMP_BIN[$i]} -lt $OUTPUT_LENGTH ] && width=$OUTPUT_LENGTH || width=${#COMP_BIN[$i]}
+			printf "${RED}%*s${NC}" $width "error"
+			continue
+		fi
 		if [ "${COMP_DIFF[$i]}" -gt 0 ]; then
 			marker_diff=${RED}
 		elif [ ${#@} -gt 1 ] && [ "${COMP_DIFF[$i]}" -eq "$value_winner_diff" ]; then
@@ -129,10 +138,10 @@ print_result_line()
 		else
 			marker_time=${NC}
 		fi
-		if [ ${#COMP_BIN[$i]} -lt 19 ]; then
+		if [ ${#COMP_BIN[$i]} -lt $OUTPUT_LENGTH ]; then
 			printf "%4d ${marker_diff}(%+3d)${NC} ${marker_time}0m%.3fs${NC}  "  ${COMP_NB_LINES[$i]} ${COMP_DIFF[$i]} ${COMP_TIME[$i]}
 		else
-			printf "%*s%4d ${marker_diff}(%+3d)${NC} ${marker_time}0m%.3fs${NC}  " $((${#COMP_BIN[$i]} - 19)) "" ${COMP_NB_LINES[$i]} ${COMP_DIFF[$i]} ${COMP_TIME[$i]}
+			printf "%*s%4d ${marker_diff}(%+3d)${NC} ${marker_time}0m%.3fs${NC}  " $((${#COMP_BIN[$i]} - $OUTPUT_LENGTH)) "" ${COMP_NB_LINES[$i]} ${COMP_DIFF[$i]} ${COMP_TIME[$i]}
 		fi
 		printf "${NC}"
 	done
@@ -146,18 +155,25 @@ run()
 	local sum_diff_lines=0
 	local sum_time=0.0
 	local tmp_out=out.tmp
-	print_header $@
 
+	print_header $@
 	for i in `seq $NB_TESTS`
 	do
 		generate_new_map
 		max=`tail -n 1 $MAP | cut -d ':' -f 2 | bc`
-		printf "%4d : %4d  " $i $max
+		printf "%4d : " $i
 		j=1
 		COMP_NB_LINES[0]=$max
 		for bin in $@
 		do
 			{ time $bin < $MAP; } > $tmp_out 2>&1
+			if [ $? -eq 0 ]; then
+				printf "${GREEN}✔ ${NC}"
+			else
+				ERROR[$j]=1
+				printf "${RED}✗ ${NC}"
+				continue
+			fi
 			usr=`grep "^L" $tmp_out | wc -l | bc`
 			time=`grep real $tmp_out | cut -f2`
 			time_nb=`echo $time | cut -c3-7 | bc -l`
@@ -172,6 +188,7 @@ run()
 			[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
 			((j++))
 		done
+		printf " %4d " $max
 		print_result_line $@
 		mv $MAP ${MAP_BFR}
 	done

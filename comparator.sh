@@ -1,30 +1,5 @@
 #!/bin/sh
 
-print_usage()
-{
-	echo "usage:"
-	echo "\t$0 nb type exe [exe ...]\n"
-	echo "example:"
-	echo "\t$0 25 big-superposition ./lem-in"
-	echo "\t\t> run 25 times 'lem-in' programm with random big-superposition map"
-	echo "\t$0 15 big /path/project1/lem-in /path/project2/lem-in"
-	echo "\t\t> run 15 times each programm with random big map"
-	echo "options:"
-	echo "\t- nb\tnumber of tests to run"
-	echo "\t- type\tant farm size based on 'generator' options (run './generator --help' for more information)"
-	echo "\t- exe\tpath to each executable file to compare"
-}
-
-[ $# -lt 3 ] && print_usage && exit 1;
-
-NB_TESTS="$1"
-shift
-TYPE="$1"
-shift
-
-MAP=".map"
-MAP_BFR=".map_old"
-
 # Colors
 RED='\033[1;31m'
 GREEN='\033[1;32m'
@@ -32,8 +7,36 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 MAGENTA='\033[1;35m'
 UNDERLINE='\033[4m'
-NC='\033[39m'
+NC='\033[0m'
 RESET='\033[0m'
+
+print_usage()
+{
+	echo "usage:"
+	echo "\t$0 nb type exe [exe ...]\n"
+	echo "example:"
+	echo "\t$0 25 big-superposition ./lem-in"
+	echo "\t\t> run 25 times 'lem-in' program with random big-superposition map"
+	echo "\t$0 15 big /path/project1/lem-in /path/project2/lem-in"
+	echo "\t\t> run 15 times each program with random big map"
+	echo "options:"
+	echo "    nb     number of tests to run"
+	echo "    type   ant farm size based on 'generator' options {flow-one, flow-ten, flow-thousand, big, big-superposition}"
+	echo "             (run './generator --help' for more information)"
+	echo "    exe    path to each executable file to compare"
+}
+
+print_usage_and_exit()
+{
+	print_usage
+	exit 1
+}
+
+print_usage_error_and_exit()
+{
+	printf "error: %s\n\n" "$1"
+	print_usage_and_exit
+}
 
 initialize_arrays()
 {
@@ -133,9 +136,10 @@ print_result_line()
 		fi
 		printf "${NC}"
 	done
+	printf "\n"
 }
 
-function	run()
+run()
 {
 	MAX_DIFF_LINES=-999999
 	MIN_DIFF_LINES=999999
@@ -165,19 +169,18 @@ function	run()
 			[ ${#@} -eq 1 ] && [ "$diff" -lt "$MIN_DIFF_LINES" ] && MIN_DIFF_LINES="$diff"
 			[ ${#@} -eq 1 ] && [ "$diff" -gt "$MAX_DIFF_LINES" ] && MAX_DIFF_LINES="$diff"
 			[ ${#@} -eq 1 ] && sum_diff_lines=$((sum_diff_lines + diff))
+			[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
 			((j++))
 		done
-		[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
 		print_result_line $@
 		mv $MAP ${MAP_BFR}
-		printf "\n"
 	done
 	[ ${#@} -eq 1 ] && AVERAGE_DIFF_LINES=`scale=2; echo "$sum_diff_lines/$NB_TESTS" | bc -l`
 	[ ${#@} -eq 1 ] && AVERAGE_TIME=`scale=3; echo "$sum_time/$NB_TESTS" | bc -l`
 	rm -f $tmp_out
 }
 
-function	print_graph()
+print_graph()
 {
 	big=`echo "${COMP[@]}" | tr ' ' '\n' | sort -gr | head -n 1`
 	for i in `seq $big`
@@ -192,7 +195,7 @@ function	print_graph()
 	done
 }
 
-function	print_axis()
+print_axis()
 {
 	printf "\n"
 	for i in {-10..10}
@@ -207,7 +210,7 @@ function	print_axis()
 	printf "\n"
 }
 
-function	get_value_winner()
+get_value_winner()
 {
 	local max="${COMP_WIN_DIFF[1]}"
 	for i in `seq ${#@}`
@@ -219,7 +222,7 @@ function	get_value_winner()
 	printf "%d" $max
 }
 
-function	print_winners()
+print_winners()
 {
 	local	value_winner=`get_value_winner $@`
 	local	is_tie=`is_this_a_tie $value_winner $@`
@@ -242,7 +245,7 @@ function	print_winners()
 	printf " 🏆 \n"
 }
 
-function	is_this_a_tie()
+is_this_a_tie()
 {
 	local	value_winner=$1
 	local	nb_occur=0
@@ -260,7 +263,7 @@ function	is_this_a_tie()
 	printf "%d" 0
 }
 
-function	print_summary()
+print_summary()
 {
 	print_graph
 	print_axis
@@ -271,6 +274,28 @@ function	print_summary()
 	printf "  ⤷ Min: %d\n" "$MIN_DIFF_LINES"
 	printf "  ⤷ Max: %d\n" "$MAX_DIFF_LINES"
 }
+
+check_binary_files_are_executable()
+{
+	for bin in $@
+	do
+		[ ! -x $bin ] && print_usage_error_and_exit "'$bin' is not executable"
+	done
+}
+
+[ $# -lt 3 ] && print_usage_and_exit
+if ! echo $1 | grep -Eq "^[0-9]+$"; then print_usage_error_and_exit "'$1' is not a valid number"; fi
+if ! echo $2 | grep -Eq "^(flow-(one|ten|thousand)|big|big-superposition)$"; then print_usage_error_and_exit "'$2' is not a valid type"; fi
+
+NB_TESTS="$1"
+shift
+TYPE="$1"
+shift
+
+check_binary_files_are_executable $@
+
+MAP=".map"
+MAP_BFR=".map_old"
 
 touch $MAP ${MAP_BFR}
 

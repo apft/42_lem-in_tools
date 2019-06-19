@@ -29,6 +29,11 @@ print_usage()
 {
 	echo "usage:"
 	echo "\t$0 exec map"
+}
+
+print_usage_and_exit()
+{
+	print_usage
 	exit 1
 }
 
@@ -277,9 +282,9 @@ run_main()
 	#rm_tmp_files $OUTPUT $files
 }
 
-[ $# -ne 2 ] && print_usage
-[ ! -x $1 ] && print_error "'$1' is not an executable file" && print_usage
-[ ! -f $2 ] && print_error "'$2' is not a valid file" && print_usage
+[ $# -ne 2 ] && print_usage_and_exit
+[ ! -x $1 ] && print_error "'$1' is not an executable file" && print_usage_and_exit
+[ ! -f $2 ] && print_error "'$2' is not a valid file" && print_usage_and_exit
 EXEC="$1"
 MAP="$2"
 OUTPUT=".out_checker"

@@ -42,7 +42,7 @@ rm_tmp_files()
 
 clean_and_exit()
 {
-	#rm_tmp_files $@
+	rm_tmp_files $@
 	exit 1
 }
 
@@ -50,14 +50,18 @@ check_usr_output()
 {
 	local nb_empty_line
 
+	print_test "Check output format"
 	nb_empty_line=`grep -E "^$" $OUTPUT | wc -l | bc`
 	if [ "$nb_empty_line" -eq 0 ]; then
 		print_error "Missing empty line between map and solution"
-		clean_and_exit $OUTPUT
+		return 1
 	elif [ "$nb_empty_line" -ne 1 ]; then
 		print_error "Too many empty lines"
-		clean_and_exit $OUTPUT
+		return 1
+	else
+		print_ok "success"
 	fi
+	return 0
 }
 
 extract_usr_output()
@@ -66,8 +70,10 @@ extract_usr_output()
 	local usr_sol=$2
 
 	check_usr_output
+	[ $? -eq 1 ] && return 1
 	grep -vE "(^$|^L)" $OUTPUT > $usr_map
 	grep "^L" $OUTPUT > $usr_sol
+	return 0
 }
 
 check_diff_output_map()
@@ -213,7 +219,8 @@ check_path_ants()
 	print_test "Check path for each ant"
 	for i in `seq $nb_ants`
 	do
-		local path=`extract_path_ant $usr_solution "L$i"`
+		local ant="L$i"
+		local path=`extract_path_ant $usr_solution $ant`
 		grep -E ":$path$" $usr_paths > /dev/null
 		if [ $? -ne 0 ]; then
 		   	print_error "Path followed by ant $ant does not exist {$path}"
@@ -231,7 +238,7 @@ check_all_ants_reach_end()
 	local nb_ants=$3
 
 	print_test "Check all ants reach room_end"
-	local nb_ants_in_end=`grep -o "$room_end" $usr_solution | wc -l | bc`
+	local nb_ants_in_end=`grep -Eo "[[:<:]]$room_end[[:>:]]" $usr_solution | wc -l | bc`
 	if [ $nb_ants -ne $nb_ants_in_end ]; then
 		local txt=`[ $nb_ants_in_end -lt $nb_ants ] && printf "few" || printf "many"`
 		print_error "Too $txt ants reach room_end (reach: $nb_ants_in_end, expected: $nb_ants)"
@@ -252,6 +259,7 @@ run_main()
 	local nb_ants=`head -n 1 $MAP`
 
 	extract_usr_output $usr_map $usr_solution
+	[ $? -eq 1 ] && clean_and_exit $OUTPUT $files
 	check_diff_output_map $usr_map
 	[ $? -eq 1 ] && clean_and_exit $OUTPUT $files
 
@@ -266,7 +274,7 @@ run_main()
 	check_all_ants_reach_end $usr_solution $room_end $nb_ants
 	[ $? -eq 1 ] && clean_and_exit $OUTPUT $files
 
-	rm_tmp_files $OUTPUT $files
+	#rm_tmp_files $OUTPUT $files
 }
 
 [ $# -ne 2 ] && print_usage

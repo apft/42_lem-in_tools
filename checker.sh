@@ -290,4 +290,9 @@ MAP="$2"
 OUTPUT=".out_checker"
 $EXEC < $MAP > $OUTPUT
 
-[ $? -eq 0 ] && run_main
+if [ $? -eq 0 ]; then
+	run_main
+else
+	print_warn "error: the following command return an error - '$EXEC < $MAP'"
+	exit 1
+fi

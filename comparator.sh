@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function print_usage()
+print_usage()
 {
 	echo "usage:"
 	echo "\t$0 nb type exe [exe ...]\n"
@@ -35,7 +35,7 @@ UNDERLINE='\033[4m'
 NC='\033[39m'
 RESET='\033[0m'
 
-function initialize_arrays()
+initialize_arrays()
 {
 	local i=1
 	for bin in $@
@@ -50,7 +50,7 @@ function initialize_arrays()
 
 }
 
-function initialize_array_comp()
+initialize_array_comp()
 {
 	for i in {0..20}
 	do
@@ -58,7 +58,7 @@ function initialize_array_comp()
 	done
 }
 
-function generate_new_map()
+generate_new_map()
 {
 	while true
 	do
@@ -68,7 +68,7 @@ function generate_new_map()
 	done
 }
 
-function print_header()
+print_header()
 {
 	printf "${UNDERLINE}        exp ${NC}"
 	for bin in $@
@@ -78,7 +78,7 @@ function print_header()
 	printf "\n"
 }
 
-function get_value_winner_diff()
+get_value_winner_diff()
 {
 	local min="${COMP_DIFF[1]}"
 
@@ -91,7 +91,7 @@ function get_value_winner_diff()
 	printf "%d" $min
 }
 
-function get_value_winner_time()
+get_value_winner_time()
 {
 	local min="${COMP_TIME[1]}"
 
@@ -105,7 +105,7 @@ function get_value_winner_time()
 	printf "%.3f" $min
 }
 
-function print_result_line()
+print_result_line()
 {
 	[ ${#@} -gt 1 ] && local value_winner_diff=`get_value_winner_diff $@`
 	[ ${#@} -gt 1 ] && local value_winner_time=`get_value_winner_time $@`

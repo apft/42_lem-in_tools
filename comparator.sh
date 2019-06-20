@@ -84,6 +84,27 @@ print_header()
 	printf "\n"
 }
 
+timeout_fct()
+{
+	local timeout_limit=$1
+	local bin=$2
+	local tmp_out=$3
+	local future_date=$((`date +%s` + $timeout_limit))
+
+	{ time $bin < $MAP; } > $tmp_out 2>&1 &
+	local pid=`echo $!`
+	while ps -p $pid > /dev/null
+	do
+		local now=`date +%s`
+		if [ $now -ge $future_date ]; then
+			kill $pid
+			wait $pid
+			return 2
+		fi
+	done
+	return 0
+}
+
 get_value_winner_diff()
 {
 	local min="${COMP_DIFF[1]}"
@@ -118,10 +139,12 @@ print_result_line()
 
 	for i in `seq ${#@}`
 	do
-		if [ ${ERROR[$i]} -eq 1 ]; then
+		if [ ${ERROR[$i]} -ne 0 ]; then
 			local width
+			local msg="error"
+			[ ${ERROR[$i]} -eq 2 ] && msg="timeout"
 			[ ${#COMP_BIN[$i]} -lt $OUTPUT_LENGTH ] && width=$OUTPUT_LENGTH || width=${#COMP_BIN[$i]}
-			printf "${RED}%*s${NC}" $width "error"
+			printf "${RED}%*s${NC}  " $width "$msg"
 			continue
 		fi
 		if [ "${COMP_DIFF[$i]}" -gt 0 ]; then
@@ -166,12 +189,14 @@ run()
 		COMP_NB_LINES[0]=$max
 		for bin in $@
 		do
-			{ time $bin < $MAP; } > $tmp_out 2>&1
-			if [ $? -eq 0 ]; then
+			timeout_fct $TIMEOUT $bin $tmp_out > /dev/null 2>&1
+			local status=$?
+			if [ $status -eq 0 ]; then
 				printf "${GREEN}✔ ${NC}"
 			else
-				ERROR[$j]=1
+				ERROR[$j]=$status
 				printf "${RED}✗ ${NC}"
+				((++j))
 				continue
 			fi
 			usr=`grep "^L" $tmp_out | wc -l | bc`
@@ -304,6 +329,7 @@ check_binary_files_are_executable()
 if ! echo $1 | grep -Eq "^[0-9]+$"; then print_usage_error_and_exit "'$1' is not a valid number"; fi
 if ! echo $2 | grep -Eq "^(flow-(one|ten|thousand)|big|big-superposition)$"; then print_usage_error_and_exit "'$2' is not a valid type"; fi
 
+TIMEOUT=10 #second
 NB_TESTS="$1"
 shift
 TYPE="$1"

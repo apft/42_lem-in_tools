@@ -210,7 +210,10 @@ run()
 			[ ${#@} -eq 1 ] && [ "$diff" -lt "$MIN_DIFF_LINES" ] && MIN_DIFF_LINES="$diff"
 			[ ${#@} -eq 1 ] && [ "$diff" -gt "$MAX_DIFF_LINES" ] && MAX_DIFF_LINES="$diff"
 			[ ${#@} -eq 1 ] && sum_diff_lines=$((sum_diff_lines + diff))
-			[ ${#@} -eq 1 ] && let "COMP[$((10 + usr - max))]++"
+			if [ ${#@} -eq 1 ]; then
+				local index=$((10 + $usr - $max))
+				[ $index -ge 0 ] && [ $index -le 20 ] &&  let "COMP[$((10 + usr - max))]++"
+			fi
 			((j++))
 		done
 		printf " %4d " $max

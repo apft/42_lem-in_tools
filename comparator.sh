@@ -76,7 +76,7 @@ generate_new_map()
 
 print_header()
 {
-	printf "%*s${UNDERLINE} %*s exp ${NC}" 7 "" $((2*${#@}))""
+	printf "%*s${UNDERLINE} %*s exp  ${NC}" 7 "" $((2*${#@}))""
 	for bin in $@
 	do
 		printf "${UNDERLINE}%*s  ${RESET}" $OUTPUT_LENGTH $bin
@@ -111,6 +111,7 @@ get_value_winner_diff()
 
 	for i in `seq ${#@}`
 	do
+		[ ${ERROR[$i]} -ne 0 ] && continue
 		if [ "${COMP_DIFF[$i]}" -lt "$min" ];then
 			min="${COMP_DIFF[$i]}"
 		fi
@@ -124,6 +125,7 @@ get_value_winner_time()
 
 	for i in `seq ${#@}`
 	do
+		[ ${ERROR[$i]} -ne 0 ] && continue
 		local compare=`echo "${COMP_TIME[$i]} < $min" | bc -l`
 		if  [ $compare -eq 1 ];then
 			min="${COMP_TIME[$i]}"
@@ -171,6 +173,20 @@ print_result_line()
 	printf "\n"
 }
 
+print_status_program()
+{
+	local status=$1
+
+	if [ $status -eq 0 ]; then
+		printf "${GREEN}✔ ${NC}"
+	else
+		ERROR[$j]=$status
+		printf "${RED}✗ ${NC}"
+		return 1
+	fi
+	return 0
+}
+
 run()
 {
 	MAX_DIFF_LINES=-999999
@@ -190,15 +206,8 @@ run()
 		for bin in $@
 		do
 			timeout_fct $TIMEOUT $bin $tmp_out > /dev/null 2>&1
-			local status=$?
-			if [ $status -eq 0 ]; then
-				printf "${GREEN}✔ ${NC}"
-			else
-				ERROR[$j]=$status
-				printf "${RED}✗ ${NC}"
-				((++j))
-				continue
-			fi
+			print_status_program $?
+			[ $? -ne 0 ] && ((++j)) && continue
 			usr=`grep "^L" $tmp_out | wc -l | bc`
 			time=`grep real $tmp_out | cut -f2`
 			time_nb=`echo $time | cut -c3-7 | bc -l`
@@ -216,7 +225,7 @@ run()
 			fi
 			((j++))
 		done
-		printf " %4d " $max
+		printf " %4d  " $max
 		print_result_line $@
 		mv $MAP ${MAP_BFR}
 	done

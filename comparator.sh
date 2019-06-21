@@ -159,26 +159,26 @@ print_result_line()
 	printf "\n"
 }
 
-sleep_and_maybe_kill()
-{
-	sleep $TIMEOUT
-	kill -9 $1 > /dev/null 2>&1
-}
-
 timeout_fct()
 {
 	local bin=$1
 	local tmp_out=$2
-	local ps_cmd=".cmd"
 
 	{ time $bin < $MAP; } > $tmp_out 2>&1 &
 	local pid=$!
-	sleep_and_maybe_kill $pid > /dev/null 2>&1 &
-	wait $pid > /dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		return 0
+	sleep $TIMEOUT &
+	local pid_sleep=$!
+	while ps -p $pid_sleep > /dev/null
+	do
+		if ! ps -p $pid > /dev/null; then
+			kill $pid_sleep > /dev/null 2>&1
+		fi
+	done
+	if ps -p $pid > /dev/null; then
+		kill $pid && killall `basename $bin` > /dev/null 2>&1
+		return 2
 	fi
-	return 2
+	return 0
 }
 
 print_status_program()
@@ -208,7 +208,7 @@ run()
 		for bin_j in `seq_start_at_zero ${#@}`
 		do
 			local bin=${COMP_BIN[$bin_j]}
-			timeout_fct $bin $tmp_out
+			timeout_fct $bin $tmp_out 2> /dev/null
 			ERROR[$bin_j]=$?
 			print_status_program ${ERROR[$bin_j]}
 			if [ ${ERROR[$bin_j]} -eq 0 ]; then
@@ -356,7 +356,7 @@ check_binary_files_are_executable()
 if ! echo $1 | grep -Eq "^[0-9]+$"; then print_usage_error_and_exit "'$1' is not a valid number"; fi
 if ! echo $2 | grep -Eq "^(flow-(one|ten|thousand)|big|big-superposition)$"; then print_usage_error_and_exit "'$2' is not a valid type"; fi
 
-TIMEOUT=3 #second
+TIMEOUT=10 #second
 NB_TESTS="$1"
 shift
 TYPE="$1"

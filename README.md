@@ -13,13 +13,13 @@ Takes  the path to your executable file and a map in arguments
 
 Run several checks on your output :
 
-1. the output map is equal to the input one (comments included)
-2. the solution is separated by an empty line from the map output
-3. each line contains only one ant
-4. each line contains only one room (except for the 'end' room)
-5. each output path is valid (ie. a link exists between two rooms when an ant is moving)
-6. each ant goes through a valid path
-7. each ant reach the 'end' room
+* the output map is equal to the input one (comments included)
+* the solution is separated by an empty line from the map output
+* each line contains only one ant
+* each line contains only one room (except for the 'end' room)
+* each output path is valid (ie. a link exists between two rooms when an ant is moving)
+* each ant goes through a valid path
+* each ant reach the 'end' room
 
 If any of the previous test fails, an explicit error is printed and the script ends.
 

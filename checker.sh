@@ -290,7 +290,7 @@ run_main()
 	check_all_ants_reach_end $usr_solution $room_end $nb_ants
 	[ $? -eq 1 ] && clean_and_exit $OUTPUT $files
 
-	#rm_tmp_files $OUTPUT $files
+	rm_tmp_files $OUTPUT $files
 }
 
 [ $# -ne 2 ] && print_usage_and_exit

@@ -19,6 +19,7 @@ Run several checks on your output :
 4. each line contains only one room (except for the 'end' room)
 5. each output path is valid (ie. a link exists between two rooms when an ant is moving)
 6. each ant goes through a valid path
+7. each ant reach the 'end' room
 
 If any of the previous test fails, an explicit error is printed and the script ends.
 

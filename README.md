@@ -75,6 +75,6 @@ If you encounter any issue, you can contact me by email: apion(at)student[dot]42
 
 by **apion** and **jkettani**
 
-*map\_edit* is a binary file provided by [vpaladii](https://github.com/samaelxxi)
+*map\_edit* is a binary file written by [vpaladii](https://github.com/samaelxxi)
 
 *generator* is a binary file provided by 42

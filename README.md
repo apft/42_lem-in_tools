@@ -35,7 +35,7 @@ This script generates a map with the *generator* and analyse the performance of 
 ```
 
 ##### Timeout
-	A timeout value is currently hard coded (currently set to 10 seconds). Modify the `TIMEOUT` variable (in seconds) to a more suitable value if needed.
+A timeout value is currently hard coded (currently set to 10 seconds). Modify the `TIMEOUT` variable (in seconds) to a more suitable value if needed.
 
 
 #### 3. generator

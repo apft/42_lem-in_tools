@@ -8,6 +8,17 @@ BLUE='\x1b[1;34m'
 MAGENTA='\x1b[1;35m'
 NC='\x1b[0m'
 
+case `uname` in
+	"Linux")
+		WORD_BOUNDARY_OPEN="\b"
+		WORD_BOUNDARY_CLOSE="\b"
+		;;
+	"Darwin")
+		WORD_BOUNDARY_OPEN="[[:<:]]"
+		WORD_BOUNDARY_CLOSE="[[:>:]]"
+		;;
+esac
+
 print_error(){
 	printf "${RED}%s${NC}\n" "$1"
 }
@@ -127,7 +138,7 @@ check_only_one_ant_per_room()
 	local line=$@
 	local duplicate
 
-	duplicate=`echo "$line" | grep -Eo "\-[A-Za-z0-9_]+[[:>:]]" | cut -c 2- | sort | grep -v "$room_end" | uniq -d`
+	duplicate=`echo "$line" | grep -Eo "\-[A-Za-z0-9_]+${WORD_BOUNDARY_CLOSE}" | cut -c 2- | sort | grep -v "$room_end" | uniq -d`
 	if [ "$duplicate" ]; then
 		print_error "Too many ants in one room"
 		echo "room: {`echo $duplicate | tr -d 'L' | tr ' ' ','`} in line: '$line'"
@@ -158,7 +169,7 @@ extract_path_ant()
 	local usr_solution=$1
 	local ant=$2
 
-	grep -Eo "[[:<:]]$ant[[:>:]]-[A-Za-z0-9_]+" $usr_solution | cut -d '-' -f 2 | tr '\n' ' ' | sed 's/ $//'
+	grep -Eo "$WORD_BOUNDARY_OPEN$ant$WORD_BOUNDARY_CLOSE-[A-Za-z0-9_]+" $usr_solution | cut -d '-' -f 2 | tr '\n' ' ' | sed 's/ $//'
 }
 
 check_path_exists()
@@ -243,7 +254,7 @@ check_all_ants_reach_end()
 	local nb_ants=$3
 
 	print_test "Check all ants reach room_end"
-	local nb_ants_in_end=`grep -Eo "[[:<:]]$room_end[[:>:]]" $usr_solution | wc -l | bc`
+	local nb_ants_in_end=`grep -Eo "${WORD_BOUNDARY_OPEN}${room_end}${WORD_BOUNDARY_CLOSE}" $usr_solution | wc -l | bc`
 	if [ $nb_ants -ne $nb_ants_in_end ]; then
 		local txt=`[ $nb_ants_in_end -lt $nb_ants ] && printf "few" || printf "many"`
 		print_error "Too $txt ants reach room_end (reach: $nb_ants_in_end, expected: $nb_ants)"
@@ -293,6 +304,6 @@ $EXEC < $MAP > $OUTPUT
 if [ $? -eq 0 ]; then
 	run_main
 else
-	print_warn "error: the following command return an error - '$EXEC < $MAP'"
+		print_warn "error: the following command return an error - '$EXEC < $MAP'"
 	exit 1
 fi

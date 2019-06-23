@@ -16,7 +16,9 @@ Takes  the path to your executable file and a map in arguments
 	- map     path to a file with the map to use
 ```
 
-If your executable is in the same directory as the script, use a leading "./" before your executable `./checker.sh ./lem-in map1`
+If your executable is in the same directory as the script, use a leading "./" before your executable
+
+`./checker.sh ./lem-in path/to/map`
 
 Run several checks on your output :
 
@@ -43,6 +45,7 @@ This script generates a map with the *generator* and analyse the performance of 
 ```
 
 If the executables are in the same path as the script use a leading "./".
+
 `./comparator.sh 5 big ./lem-in`
 
 ##### Timeout

@@ -1,9 +1,9 @@
 # Tools for the lem-in project
 
-* *checker.sh*
-* *comparator.sh*
-* *generator*
-* *map_edit*
+* [*checker.sh*](https://github.com/apft/42_lem-in_tools#1-checkersh)
+* [*comparator.sh*](https://github.com/apft/42_lem-in_tools#2-comparatorsh)
+* [*generator*](https://github.com/apft/42_lem-in_tools#3-generator)
+* [*map_edit*](https://github.com/apft/42_lem-in_tools#4-map_edit)
 
 #### 1. checker.sh
 A script to check your *lem-in* output.

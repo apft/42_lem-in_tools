@@ -9,7 +9,14 @@
 A script to check your *lem-in* output.
 Takes  the path to your executable file and a map in arguments
 
+```
 ./checker.sh exec map
+
+	- exec    path to your executable
+	- map     path to a file with the map to use
+```
+
+If your executable is in the same directory as the script, use a leading "./" before your executable `./checker.sh ./lem-in map1`
 
 Run several checks on your output :
 
@@ -28,12 +35,15 @@ If any of the previous test fails, an explicit error is printed and the script e
 This script generates a map with the *generator* and analyse the performance of each executable given in argument.
 
 ```
-./comparator nb_test map_type exec [exec...]
+./comparator.sh nb_test map_type exec [exec...]
 
 	- nb_test   number of map to generate
 	- map_type  based on *generator* values (flow-one, flow-ten, flow-thousand, big, big-superposition)
 	- exec      a list of path to each executable to test
 ```
+
+If the executables are in the same path as the script use a leading "./".
+`./comparator.sh 5 big ./lem-in`
 
 ##### Timeout
 A timeout value is currently hard coded (currently set to 10 seconds). Modify the `TIMEOUT` variable (in seconds) to a more suitable value if needed.

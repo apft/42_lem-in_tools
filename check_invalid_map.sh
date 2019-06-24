@@ -4,7 +4,7 @@ if [ -f colors.sh ]; then
 	. colors.sh
 fi
 
-PROJECT_PATH=../lem_in
+LEM_IN_EXEC=$1
 
 MAP_PATH=maps/invalid
 INPUT_DATA=data_error.txt
@@ -33,7 +33,7 @@ run_test()
 
 	printf "%-50s" "$name"
 	if [ -f "${MAP_PATH}/${map}" ];then
-		${PROJECT_PATH}/lem-in < "${MAP_PATH}/${map}" > /dev/null 2> ${TEST_TMP}
+		${LEM_IN_EXEC} < "${MAP_PATH}/${map}" > /dev/null 2> ${TEST_TMP}
 		local output=`cat -e ${TEST_TMP}`
 		if [ "${output:0:5}" = "ERROR" ]; then
 			print_ok "Good!"
@@ -54,6 +54,23 @@ run_all_tests()
 		run_test ${line}
 	done < ${INPUT_DATA}
 }
+
+print_usage_and_exit()
+{
+	printf "%s\n" "Usage: ./check_invalid_maps.sh exec"
+	printf "%s\n" "  -exec   Path to executable"
+	exit
+}
+
+if [ $# -ne 1 ];then
+	print_usage_and_exit
+	exit
+fi
+
+if [ ! -f $1 ];then
+	printf "%s\n" "Executable ($1) not found"
+	exit
+fi
 
 run_all_tests
 

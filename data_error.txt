@@ -1,0 +1,31 @@
+command start before number of ants;start_before_nb_ants
+command start and comments before number of ants;start_and_comments_before_nb_ants
+command end before number of ants;end_before_nb_ants
+number of ants empty;ants_empty
+number of ants followed by a sign;ants_nbr_invalid_char_2
+number of ants followed by an invalid char;ants_nbr_invalid_char
+number of ants invalid spacing;ants_nbr_invalid_spacing
+number of ants < 0;ants_nbr_neg
+number of ants < INT_MIN;ants_nbr_inf_int_min
+number of ants > INT_MAX;ants_nbr_too_big
+room name starts with 'L';room_start_with_L
+room name has '-';room_has_dash
+room name with unprintable char;room_has_unprintable_char
+room line without coord;room_without_coord
+room line with too much args;room_too_much_arg
+room with invalid coord;room_invalid_coord
+room name duplicated;room_name_duplicated
+room coord duplicated;room_coord_duplicated
+no start given;no_start
+no end given;no_end
+tube: room does not exist;tube_room_does_not_exist
+tube has spaces;tube_has_spaces
+room without y coord;room_no_y_coord
+room redeclared after tube;room_after_tube
+empty map;empty_map
+empty line no tube to end;empty_line_no_tube_to_end
+empty line no end defined;empty_line_no_end_defined
+no tubes;no_tubes
+start is end;start_is_end
+start command not followed by room;start_not_followed_by_room
+start command before tube;start_command_before_tube

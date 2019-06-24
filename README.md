@@ -1,11 +1,21 @@
 # Tools for the lem-in project
 
-* [*checker.sh*](https://github.com/apft/42_lem-in_tools#1-checkersh)
-* [*comparator.sh*](https://github.com/apft/42_lem-in_tools#2-comparatorsh)
-* [*generator*](https://github.com/apft/42_lem-in_tools#3-generator)
-* [*map_edit*](https://github.com/apft/42_lem-in_tools#4-map_edit)
+* [*check_invalid_map.sh*](https://github.com/apft/42_lem-in_tools#1-check_invalid_mapsh)
+* [*checker.sh*](https://github.com/apft/42_lem-in_tools#2-checkersh)
+* [*comparator.sh*](https://github.com/apft/42_lem-in_tools#3-comparatorsh)
+* [*generator*](https://github.com/apft/42_lem-in_tools#4-generator)
+* [*map_edit*](https://github.com/apft/42_lem-in_tools#5-map_edit)
 
-#### 1. checker.sh
+#### 1. check_invalid_map.sh
+Script that checks how your lem-in handles different invalid maps
+
+```
+./check_invalid_map exec
+
+	- exec   path to your executable
+```
+
+#### 2. checker.sh
 A script to check your *lem-in* output.
 Takes  the path to your executable file and a map in arguments
 
@@ -33,7 +43,7 @@ Run several checks on your output :
 If any of the previous test fails, an explicit error is printed and the script ends.
 
 
-#### 2. comparator.sh
+#### 3. comparator.sh
 This script generates a map with the *generator* and analyse the performance of each executable given in argument.
 
 ```
@@ -52,11 +62,11 @@ If the executables are in the same path as the script use a leading "./".
 A timeout value is currently hard coded (currently set to 10 seconds). Modify the `TIMEOUT` variable (in seconds) to a more suitable value if needed.
 
 
-#### 3. generator
+#### 4. generator
 A binary file compiled for Mac to generate random maps.
 Run `./generator --help` for more information
 
-#### 4. map_edit
+#### 5. map_edit
 
 From its creator *vpaladii*
 

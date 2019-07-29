@@ -6,6 +6,9 @@ fi
 
 STATUS_SUCCESS=0
 
+count_success=0
+count_failure=0
+
 case `uname` in
 	"Linux")
 		WORD_BOUNDARY_OPEN="\b"
@@ -55,6 +58,17 @@ check_executable()
 		fi
 	done
 	return 0
+}
+
+add_prefix_if_current_dir()
+{
+	local file=$1
+
+	if [ "`dirname $file`" = "." -a ${file:0:2} != "./" ]; then
+		printf "./$file"
+	else
+		printf "$file"
+	fi
 }
 
 create_filename()

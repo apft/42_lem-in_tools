@@ -20,15 +20,12 @@ A script to check your *lem-in* output.
 Takes  the path to your executable file and a map in arguments
 
 ```
-./checker.sh exec map
+Usage:  ./checker.sh [-h] <lem-in> <map>
 
-	- exec    path to your executable
-	- map     path to a file with the map to use
+     -h        print this message and exit
+     lem-in    path to your lem-in executable
+     map       map to test
 ```
-
-If your executable is in the same directory as the script, use a leading "./" before your executable
-
-`./checker.sh ./lem-in path/to/map`
 
 Run several checks on your output :
 
@@ -40,7 +37,7 @@ Run several checks on your output :
 * each ant goes through a valid path
 * each ant reach the 'end' room
 
-If any of the previous test fails, an explicit error is printed and the script ends.
+If any of the previous test fails, an explicit error is printed.
 
 
 #### 3. comparator.sh
@@ -88,11 +85,6 @@ There's indicator below start and end nodes which tells you if map is valid.
 
 You can click on mouse right button to see room names.
 ```
-
-
-## Issues
-
-If you encounter any issue, you can contact me by email: apion(at)student[dot]42[dot]fr
 
 
 ## Authors

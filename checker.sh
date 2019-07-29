@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# Colors
-RED='\x1b[1;31m'
-GREEN='\x1b[1;32m'
-YELLOW='\x1b[1;33m'
-BLUE='\x1b[1;34m'
-MAGENTA='\x1b[1;35m'
-NC='\x1b[0m'
+if [ -f commons.sh ]; then
+	. commons.sh
+fi
 
 case `uname` in
 	"Linux")
@@ -19,18 +15,6 @@ case `uname` in
 		;;
 esac
 
-print_error(){
-	printf "${RED}%s${NC}\n" "$1"
-}
-
-print_ok(){
-	printf "${GREEN}%s${NC}\n" "$1"
-}
-
-print_warn(){
-	printf "${YELLOW}%s${NC}\n" "$1"
-}
-
 print_test()
 {
 	printf "%s  - " "$1"
@@ -38,8 +22,9 @@ print_test()
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage:  $0 <lem-in> <map>"
+	printf "%s\n" "Usage:  $0 [-h] <lem-in> <map>"
 	printf "\n"
+	printf "%s\n" "   -h        print this message and exit"
 	printf "%s\n" "   lem-in    path to your lem-in executable"
 	printf "%s\n" "   map       map to test"
 	exit 1
@@ -303,6 +288,8 @@ shift $((OPTIND - 1))
 if [ $# -ne 2 ]; then
    print_usage_and_exit
 fi
+check_executable $1 || exit
+check_valid_file $2 || exit
 EXEC="$1"
 MAP="$2"
 OUTPUT=".out_checker"
@@ -311,6 +298,6 @@ $EXEC < $MAP > $OUTPUT
 if [ $? -eq 0 ]; then
 	run_main
 else
-		print_warn "error: the following command return an error - '$EXEC < $MAP'"
+	printf "%s\n" "Error: the following command return an error '$EXEC < $MAP'"
 	exit 1
 fi

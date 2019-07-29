@@ -36,15 +36,12 @@ print_test()
 	printf "%s  - " "$1"
 }
 
-print_usage()
-{
-	echo "usage:"
-	echo "\t$0 exec map"
-}
-
 print_usage_and_exit()
 {
-	print_usage
+	printf "%s\n" "Usage:  $0 <lem-in> <map>"
+	printf "\n"
+	printf "%s\n" "   lem-in    path to your lem-in executable"
+	printf "%s\n" "   map       map to test"
 	exit 1
 }
 
@@ -293,9 +290,19 @@ run_main()
 	rm_tmp_files $OUTPUT $files
 }
 
-[ $# -ne 2 ] && print_usage_and_exit
-[ ! -x $1 ] && print_error "'$1' is not an executable file" && print_usage_and_exit
-[ ! -f $2 ] && print_error "'$2' is not a valid file" && print_usage_and_exit
+while getopts "h" opt
+do
+	case $opt in
+		h|*)
+			print_usage_and_exit
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 2 ]; then
+   print_usage_and_exit
+fi
 EXEC="$1"
 MAP="$2"
 OUTPUT=".out_checker"

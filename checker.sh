@@ -314,7 +314,7 @@ run_main()
 	fi
 }
 
-DEBUG=1
+DEBUG=0
 CLEAN_FIRST=0
 
 EXEC=""

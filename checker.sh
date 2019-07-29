@@ -27,8 +27,9 @@ print_test()
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage:  $0 [-h] <lem-in> <map>"
+	printf "%s\n" "Usage:  $0 [-ch] <lem-in> <map>"
 	printf "\n"
+	printf "%s\n" "   -c        clean the directory first"
 	printf "%s\n" "   -h        print this message and exit"
 	printf "%s\n" "   lem-in    path to your lem-in executable"
 	printf "%s\n" "   map       map to test"
@@ -313,9 +314,23 @@ run_main()
 	fi
 }
 
-while getopts "h" opt
+DEBUG=1
+CLEAN_FIRST=0
+
+EXEC=""
+MAP=""
+OUTPUT=".out_checker"
+
+DIR_DIFF=".diff"
+DIR_MAP_ERR=".map_err"
+DIRS="$DIR_DIFF $DIR_MAP_ERR"
+
+while getopts "ch" opt
 do
 	case $opt in
+		c)
+			CLEAN_FIRST=1
+			;;
 		h|*)
 			print_usage_and_exit
 			;;
@@ -330,16 +345,12 @@ fi
 check_executable $1 || exit
 check_valid_file $2 || exit
 
-DEBUG=1
-
 EXEC="`add_prefix_if_current_dir $1`"
 MAP="$2"
-OUTPUT=".out_checker"
 
-DIR_DIFF=".diff"
-DIR_MAP_ERR=".map_err"
-DIRS="$DIR_DIFF $DIR_MAP_ERR"
-
+if [ $CLEAN_FIRST -eq 1 ]; then
+	clean_dir $DIRS
+fi
 initialize_dir $DIRS
 
 if [ $DEBUG -eq 0 ]; then

@@ -149,7 +149,7 @@ check_usr_solution()
 	while read line
 	do
 		((i++))
-		check_only_one_ant_per_room $room_end $line
+		check_only_one_ant_per_room $i $room_end $line
 		[ $? -eq 1 ] && return "1"
 		check_only_one_move_per_ant $i $line
 		[ $? -eq 1 ] && return "1"

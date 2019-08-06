@@ -1,30 +1,46 @@
 # Tools for the lem-in project
 
-* [*check_invalid_map.sh*](https://github.com/apft/42_lem-in_tools#1-check_invalid_mapsh)
-* [*checker.sh*](https://github.com/apft/42_lem-in_tools#2-checkersh)
-* [*comparator.sh*](https://github.com/apft/42_lem-in_tools#3-comparatorsh)
-* [*generator*](https://github.com/apft/42_lem-in_tools#4-generator)
-* [*map_edit*](https://github.com/apft/42_lem-in_tools#5-map_edit)
+* [*check_invalid_map.sh*](#1-check_invalid_mapsh)
+* [*checker.sh*](#2-checkersh)
+* [*comparator.sh*](#3-comparatorsh)
+* [*generator*](#4-generator)
+* [*map_edit*](#5-map_edit)
 
-#### 1. check_invalid_map.sh
+### 1. check_invalid_map.sh
 Script that checks how your lem-in handles different invalid maps
-
 ```
-./check_invalid_map exec
+./check_invalid_map.sh exec
 
-	- exec   path to your executable
+	exec   path to your executable
 ```
 
-#### 2. checker.sh
+This script run a set of unit tests with invalid maps.
+The maps are stored in _maps/invalid_ and the script read the `data_error.txt`
+file to run each test.  
+
+To add new tests, follow the following syntax :
+```
+(1) test name ; (2) file_name
+```
+* (1) name of the test to display while running the script
+* (2) name of the file with the map, this file should be stored under `maps/invalid`
+
+
+### 2. checker.sh
 A script to check your *lem-in* output.
 Takes  the path to your executable file and a map in arguments
-
 ```
 Usage:  ./checker.sh [-h] <lem-in> <map>
 
      -h        print this message and exit
      lem-in    path to your lem-in executable
      map       map to test
+```
+
+Assuming your executable file is in the parent directory, the following command
+will run the checker on a valid map.
+```
+./checker.sh ../lem-in maps/valid/map_subject_3
 ```
 
 Run several checks on your output :
@@ -40,15 +56,15 @@ Run several checks on your output :
 If any of the previous test fails, an explicit error is printed.
 
 
-#### 3. comparator.sh
+### 3. comparator.sh
 This script generates a map with the *generator* and analyse the performance of each executable given in argument.
 
 ```
 ./comparator.sh nb_test map_type exec [exec...]
 
-	- nb_test   number of map to generate
-	- map_type  based on *generator* values (flow-one, flow-ten, flow-thousand, big, big-superposition)
-	- exec      a list of path to each executable to test
+	nb_test   number of map to generate
+	map_type  based on *generator* values (flow-one, flow-ten, flow-thousand, big, big-superposition)
+	exec      a list of path to each executable to test
 ```
 
 If the executables are in the same path as the script use a leading "./".
@@ -59,11 +75,11 @@ If the executables are in the same path as the script use a leading "./".
 A timeout value is currently hard coded (currently set to 10 seconds). Modify the `TIMEOUT` variable (in seconds) to a more suitable value if needed.
 
 
-#### 4. generator
+### 4. generator
 A binary file compiled for Mac to generate random maps.
 Run `./generator --help` for more information
 
-#### 5. map_edit
+### 5. map_edit
 
 From its creator *vpaladii*
 
